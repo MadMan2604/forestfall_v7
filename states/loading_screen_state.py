@@ -28,7 +28,6 @@ class LoadingScreen(BaseState):
         # draw the progress bar
         pygame.draw.rect(self.screen, WHITE, (410, 755, progress * 5.8, 40))
 
-        pygame.display.flip()
     
 
     def update(self, events):
@@ -47,6 +46,7 @@ class LoadingScreen(BaseState):
                     self.game.state_manager.change_state("game")
                 elif back_button.rect.collidepoint(event.pos):
                     self.game.state_manager.change_state("title_screen")
+                    self.game.state_manager.exit_state("loading_screen")
 
         
         self.screen.fill((0, 0, 0))

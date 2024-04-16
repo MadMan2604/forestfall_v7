@@ -46,20 +46,20 @@ class InGame(BaseState):
             'buildings': load_images('tiles/buildings'),
             'trees': load_images('tiles/trees'),
             'cave_stone': load_images('tiles/cave_stone'),
-            'alt_tiles_1': load_images('tiles/alt_tiles_1'), 
+            'alt_grass': load_images('tiles/alt_grass'), 
             'alt_large_decor_1': load_images('tiles/alt_large_decor_1'),
+            'signpost': load_images('tiles/signposts'),
             #'portal_1': load_image('tiles/portal_1'),
             #'portal_2': load_image('tiles/portal_2'),
             #'portal_3': load_image('tiles/portal_3'),
             'grass': load_images('tiles/grass'),
-            'grass1': load_images('tiles/grass1'),
+            'jungle_grass': load_images('tiles/jungle_grass'),
+            'jungle_bg_tiles': load_images('tiles/jungle_bg'),
             'dirt': load_images('tiles/dirt'),
             'large_decor': load_images('tiles/large_decor'),
-            'stone': load_images('tiles/stone'),
             'background': load_image('backgrounds/background.png'),
             'bgstone': load_images('tiles/bgtiles'),
             'player': load_image('entities/player.png'),
-            'clouds': load_images('clouds'),
             'enemy/idle': Animation(load_images('entities/enemy/idle'), img_dur=6),
             'enemy/run': Animation(load_images('entities/enemy/run'), img_dur=4),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=2),
@@ -69,8 +69,8 @@ class InGame(BaseState):
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
             'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
-            'gun': load_image('gun.png'),
-            'projectile': load_image('projectile.png'),
+            'bow': load_image('bow.png'),
+            'arrow': load_image('arrow.png'),
             
         }
         
@@ -108,13 +108,7 @@ class InGame(BaseState):
     # functiton thtat loads the levels (1 --> 5)    
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
-        
-        background_path = self.backgrounds.get(map_id)
-        if background_path is not None:
-            print("Background file:", background_path)
-            self.assets['background'] = load_image(background_path)
-        else:
-            print(f"Error: Background image not found for map_id {map_id}")
+
         
         self.leaf_spawners = []
         for tree in self.tilemap.extract([('large_decor', 2)], keep=True):
@@ -147,7 +141,7 @@ class InGame(BaseState):
         self.screen.blit(pause_surface, (0, 0))
         
     # The main game game state funciton     
-    def run(self):
+    def update(self):
 
         # Load the music
         pygame.mixer.music.load('data/music/lvl1_test.mp3')
@@ -189,13 +183,21 @@ class InGame(BaseState):
                 
                 self.screenshake = max(0, self.screenshake - 1)
                 
+                # Inside the main game loop where the level transition occurs
                 if not len(self.enemies):
-                    self.transition += 1
-                    if self.transition > 30:
-                        self.level = min(self.level + 1, len(os.listdir('data/maps')) - 1)
-                        self.load_level(self.level)
-                if self.transition < 0:
-                    self.transition += 1
+                    # Check if the player is colliding with the specific object and the "E" key is pressed
+                    player_rect = self.player.rect()
+                    specific_object_rect = self.assets['signpost'].get_rect()  # Replace 'specific_object' with the key of your specific object
+                    keys = pygame.key.get_pressed()
+                    if player_rect.colliderect(specific_object_rect) and keys[pygame.K_RETURN]:
+                        self.transition += 1
+                        if self.transition > 30:
+                            self.level = min(self.level + 1, len(os.listdir('data/maps')) - 1)
+                            self.load_level(self.level)
+                else:
+                    self.transition -= 1  # Decrease transition if no transition condition is met
+                    self.transition = max(self.transition, 0)  # Ensure transition doesn't go below 0
+
                 
                 if self.dead:
                     self.dead += 1

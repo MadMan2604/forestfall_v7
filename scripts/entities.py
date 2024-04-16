@@ -9,6 +9,7 @@ from scripts.spark import Spark
 
 class PhysicsEntity:
     def __init__(self, game, e_type, pos, size):
+
         self.game = game
         self.type = e_type
         self.pos = list(pos)
@@ -22,6 +23,8 @@ class PhysicsEntity:
         self.set_action('idle')
         
         self.last_movement = [0, 0]
+
+        
     
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -29,7 +32,7 @@ class PhysicsEntity:
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            self.animation = self.game.assets.copy()
+            self.animation = self.game.assets[self.type + '/' + self.action].copy()
         
     def update(self, tilemap, movement=(0, 0)):
         self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
@@ -229,3 +232,8 @@ class Player(PhysicsEntity):
                 self.dashing = -60
             else:
                 self.dashing = 60
+
+
+# interactive npc class
+class NPC(PhysicsEntity):
+    pass 
